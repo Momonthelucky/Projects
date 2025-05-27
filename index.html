@@ -1,0 +1,204 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dylan Byler's Portfolio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Fira+Code&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(to bottom, #1A1A2E, #16213E);
+      min-height: 100vh;
+      color: #E0E0E0;
+      font-family: 'Fira Code', monospace;
+      overflow-x: hidden;
+    }
+    #particles-js {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      opacity: 0.3;
+    }
+    .glow {
+      transition: all 0.3s ease;
+    }
+    .glow:hover {
+      box-shadow: 0 0 10px #6B5B95;
+      border-color: #6B5B95;
+    }
+    section {
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeIn 1s ease forwards;
+    }
+    @keyframes fadeIn {
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div id="particles-js"></div>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const App = () => {
+      return (
+        <div className="max-w-4xl mx-auto p-6">
+          {/* Header */}
+          <header className="flex justify-between items-center py-4">
+            <h1 className="text-2xl font-bold text-[#6B5B95] font-['Orbitron']">Dylan Byler</h1>
+            <nav>
+              <ul className="flex space-x-4">
+                <li><a href="#home" className="text-[#E0E0E0] hover:text-[#6B5B95] glow">Home</a></li>
+                <li><a href="#work" className="text-[#E0E0E0] hover:text-[#6B5B95] glow">Work</a></li>
+                <li><a href="#projects" className="text-[#E0E0E0] hover:text-[#6B5B95] glow">Projects</a></li>
+                <li><a href="#blog" className="text-[#E0E0E0] hover:text-[#6B5B95] glow">Blog</a></li>
+                <li><a href="#reading" className="text-[#E0E0E0] hover:text-[#6B5B95] glow">Reading List</a></li>
+              </ul>
+            </nav>
+          </header>
+
+          {/* Hero */}
+          <section id="home" className="py-16 text-center">
+            <h2 className="text-4xl font-['Orbitron'] text-[#E0E0E0] mb-4">Worker Drone by Day, Dreamer by Night</h2>
+            <p className="text-lg">Solar Professional | Network Technician | Open to opportunities</p>
+            <a href="mailto:momoncodes@gmail.com" className="mt-4 inline-block px-6 py-2 rounded bg-[#4B5EAA] text-[#E0E0E0] glow">Contact Me</a>
+          </section>
+
+          {/* Work */}
+          <section id="work" className="py-16">
+            <h2 className="text-3xl font-['Orbitron'] text-[#6B5B95] mb-8">Work</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="p-6 rounded-lg bg-[#1A1A2E]/50 glow">
+                <h3 className="text-xl font-bold">Job Title 1</h3>
+                <p>Company Name | 2023 - Present</p>
+                <p>Describe your role and achievements here.</p>
+                <a href="#" className="text-[#4B5EAA] hover:text-[#6B5B95]">Learn More</a>
+              </div>
+              <div className="p-6 rounded-lg bg-[#1A1A2E]/50 glow">
+                <h3 className="text-xl font-bold">Job Title 2</h3>
+                <p>Company Name | 2021 - 2023</p>
+                <p>Describe your role and achievements here.</p>
+                <a href="#" className="text-[#4B5EAA] hover:text-[#6B5B95]">Learn More</a>
+              </div>
+            </div>
+          </section>
+
+          {/* Projects */}
+          <section id="projects" className="py-16">
+            <h2 className="text-3xl font-['Orbitron'] text-[#6B5B95] mb-8">Projects</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="p-6 rounded-lg bg-[#1A1A2E]/50 glow">
+                <h3 className="text-xl font-bold">Project 1</h3>
+                <p>Describe your project here. Add links or tech stack details.</p>
+                <a href="#" className="text-[#4B5EAA] hover:text-[#6B5B95]">View Project</a>
+              </div>
+              <div className="p-6 rounded-lg bg-[#1A1A2E]/50 glow">
+                <h3 className="text-xl font-bold">Project 2</h3>
+                <p>Describe another project. Highlight unique features.</p>
+                <a href="#" className="text-[#4B5EAA] hover:text-[#6B5B95]">View Project</a>
+              </div>
+            </div>
+          </section>
+
+          {/* Blog */}
+          <section id="blog" className="py-16">
+            <h2 className="text-3xl font-['Orbitron'] text-[#6B5B95] mb-8">Blog</h2>
+            <div className="space-y-6">
+              <div className="p-6 rounded-lg bg-[#1A1A2E]/50 glow">
+                <h3 className="text-xl font-bold">Blog Post Title</h3>
+                <p className="text-sm text-gray-400">2025-05-26</p>
+                <p>Summary of your blog post. Keep it short and engaging.</p>
+                <a href="#" className="text-[#4B5EAA] hover:text-[#6B5B95]">Read More</a>
+              </div>
+            </div>
+          </section>
+
+          {/* Reading List */}
+          <section id="reading" className="py-16">
+            <h2 className="text-3xl font-['Orbitron'] text-[#6B5B95] mb-8">Reading List</h2>
+            <ul className="space-y-4">
+              <li className="p-4 rounded-lg bg-[#1A1A2E]/50 glow">
+                <a href="#" className="text-[#4B5EAA] hover:text-[#6B5B95]">Article Title</a>
+                <p>Short description of the article or resource.</p>
+              </li>
+            </ul>
+          </section>
+
+          {/* Footer */}
+          <footer className="py-8 text-center">
+            <p>Connect with me:</p>
+            <div className="flex justify-center space-x-4 mt-4">
+              <a href="https://github.com/Momonthelucky" className="text-[#4B5EAA] hover:text-[#6B5B95] glow">GitHub</a>
+              <a href="https://x.com/DR_Byler" className="text-[#4B5EAA] hover:text-[#6B5B95] glow">X</a>
+              <a href="mailto:momoncodes@gmail.com" className="text-[#4B5EAA] hover:text-[#6B5B95] glow">Email</a>
+            </div>
+            <p className="mt-4 text-sm">© 2025 Dylan Byler. All rights reserved.</p>
+          </footer>
+        </div>
+      );
+    };
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+
+    // Initialize particles.js for nebula effect
+    particlesJS('particles-js', {
+      particles: {
+        number: { value: 80, density: { enable: true, value_area: 800 } },
+        color: { value: '#6B5B95' },
+        shape: { type: 'circle' },
+        opacity: { value: 0.5, random: true },
+        size: { value: 3, random: true },
+        line_linked: { enable: false },
+        move: { speed: 0.5, random: true }
+      },
+      interactivity: { events: { onhover: { enable: false } } }
+    });
+  </script>
+</body>
+</html>
